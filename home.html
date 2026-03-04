@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trang chủ - PTIT</title>
+
+  <style>
+    /* ====== Base hiện có của bạn (giữ nguyên) ====== */
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #fff5f5;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      background-color: #ff3333;
+      height: 60px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 20px;
+      color: white;
+      flex-shrink: 0;
+    }
+    .menu-icon { font-size: 30px; cursor: pointer; }
+    .user-pill {
+      background-color: #ff9966;
+      padding: 5px 25px;
+      border-radius: 20px;
+      text-align: center;
+      color: white;
+      font-weight: bold;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .container { display: flex; flex: 1; overflow: hidden; }
+
+    .sidebar {
+      width: 300px;
+      background-color: white;
+      border-right: 2px solid #ff3333;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+      overflow: hidden;
+      transition: width 0.3s ease, border 0.3s ease;
+      flex-shrink: 0;
+    }
+    .sidebar.collapsed { width: 0; border: none; }
+    .menu-list { flex: 1; padding: 0 20px; }
+
+    .menu-item {
+      padding: 15px 0;
+      border-bottom: 2px solid #ffcccc;
+      color: #ff3333;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .menu-item:hover { color: #cc0000; }
+    .menu-item.active { font-weight: bold; }
+
+    .sidebar-footer {
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .footer-logo { width: 50px; height: auto; }
+    .footer-text {
+      font-size: 10px;
+      font-weight: bold;
+      color: #cc3333;
+      text-transform: uppercase;
+      line-height: 1.3;
+    }
+
+    /* ====== Dashboard style (mới) – thiết kế admin, nghiêm túc ====== */
+    :root{
+      --bg: #f6f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --border: #e5e7eb;
+      --primary: #d81b1b;      /* đỏ PTIT */
+      --primary-2: #b81414;
+      --ring: rgba(216,27,27,.18);
+      --shadow: 0 10px 30px rgba(0,0,0,.06);
+    }
+
+    .main-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 0;
+      background: var(--bg);
+    }
+
+    .dashboard{
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    .dashboard-top{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:16px;
+      margin-bottom: 18px;
+    }
+    .dashboard-title{ display:flex; flex-direction:column; gap:6px; }
+    .dashboard-title h1{
+      margin:0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: .2px;
+      color: var(--text);
+    }
+    .dashboard-title p{
+      margin:0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .dashboard-actions{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      flex-wrap: wrap;
+      justify-content:flex-end;
+    }
+
+    .admin-search{
+      width: 280px;
+      max-width: 60vw;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 10px 12px;
+      outline: none;
+      background: #fff;
+      transition: .2s;
+    }
+    .admin-search:focus{
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--ring);
+    }
+
+    .btn-primary{
+      border: 1px solid var(--primary);
+      background: var(--primary);
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s;
+      white-space: nowrap;
+    }
+    .btn-primary:hover{ background: var(--primary-2); border-color: var(--primary-2); }
+
+    .btn-outline{
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: .2s;
+      white-space: nowrap;
+    }
+    .btn-outline:hover{ border-color: var(--primary); box-shadow: 0 0 0 4px var(--ring); }
+
+    .stats-grid{
+      display:grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin: 16px 0 18px;
+    }
+    @media (max-width: 1100px){
+      .stats-grid{ grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px){
+      .stats-grid{ grid-template-columns: 1fr; }
+    }
+
+    .stat-card{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow:hidden;
+    }
+    .stat-card:before{
+      content:"";
+      position:absolute;
+      top:-40px; right:-40px;
+      width:120px; height:120px;
+      background: radial-gradient(circle at center, rgba(216,27,27,.15), transparent 60%);
+    }
+    .stat-label{
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: .2px;
+    }
+    .stat-value{
+      margin-top: 8px;
+      font-size: 26px;
+      font-weight: 900;
+      color: var(--text);
+    }
+    .stat-sub{
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .content-grid{
+      display:grid;
+      grid-template-columns: 1.3fr .7fr;
+      gap: 14px;
+      margin-top: 14px;
+    }
+    @media (max-width: 1000px){
+      .content-grid{ grid-template-columns: 1fr; }
+    }
+
+    .panel{
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      overflow:hidden;
+    }
+    .panel-header{
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .panel-title{
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--text);
+    }
+    .panel-hint{
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .panel-body{ padding: 14px 16px; }
+
+    .admin-table{ width:100%; border-collapse: collapse; }
+    .admin-table th{
+      text-align:left;
+      font-size: 12px;
+      color: var(--muted);
+      padding: 10px 10px;
+      border-bottom: 1px solid var(--border);
+      background: #fafafa;
+      font-weight: 900;
+    }
+    .admin-table td{
+      padding: 12px 10px;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      color: var(--text);
+    }
+    .admin-table tr:hover td{ background: #fff7f7; }
+
+    .link{
+      color: var(--primary);
+      font-weight: 800;
+      text-decoration: none;
+    }
+    .link:hover{ text-decoration: underline; }
+
+    .quick-actions{ display:flex; flex-direction:column; gap:10px; }
+    .qa-btn{
+      width:100%;
+      text-align:left;
+      padding: 12px 12px;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      transition: .2s;
+    }
+    .qa-btn:hover{ border-color: var(--primary); box-shadow: 0 0 0 4px var(--ring); }
+    .qa-title{ font-weight: 900; color: var(--text); font-size: 13px; }
+    .qa-desc{ margin-top: 4px; font-size: 12px; color: var(--muted); }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      border: 1px solid var(--border);
+      background: #fff;
+    }
+    .badge.ok{ border-color: rgba(16,185,129,.35); background: rgba(16,185,129,.10); color:#0f766e; }
+    .badge.warn{ border-color: rgba(245,158,11,.35); background: rgba(245,158,11,.10); color:#92400e; }
+    .badge.due{ border-color: rgba(239,68,68,.35); background: rgba(239,68,68,.10); color:#991b1b; }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+  </div>
+
+  <div class="container">
+    <div class="sidebar" id="sidebar">
+      <div class="menu-list">
+        <a href="home.html" class="menu-item active"><span>🏠</span> Trang chủ</a>
+        <a href="room_info.html?view=overview" class="menu-item">📋 Thông tin phòng</a>
+        <a href="https://youtu.be/dQw4w9WgXcQ?si=Bil_istASGQg0YK5" class="menu-item" target="_blank">Hỗ trợ</a>
+      </div>
+
+      <div class="sidebar-footer">
+        <img src="https://dhs.ptit.edu.vn/web/image/385-67ae5bc7/Logo_PTIT_University.png" alt="Logo" class="footer-logo">
+        <div class="footer-text">
+          HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH<br>
+          VIỄN THÔNG CƠ SỞ TP.HỒ CHÍ MINH
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Main dashboard ===== -->
+    <div class="main-content">
+      <div class="dashboard">
+
+        <div class="dashboard-top">
+          <div class="dashboard-title">
+            <h1>Dashboard quản lý KTX</h1>
+            <p>Tổng quan vận hành, phòng ở và trạng thái sinh viên.</p>
+          </div>
+
+          <div class="dashboard-actions">
+            <input id="quickSearch" class="admin-search" placeholder="Tìm nhanh theo mã SV...">
+            <button class="btn-outline" onclick="location.href='room_info.html?view=overview'">Danh sách phòng</button>
+            <button class="btn-primary" onclick="refreshDashboard()">Làm mới</button>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Tổng số phòng</div>
+            <div class="stat-value" id="statRooms">-</div>
+            <div class="stat-sub">Toàn bộ khu A/B</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Tổng sinh viên</div>
+            <div class="stat-value" id="statStudents">-</div>
+            <div class="stat-sub">Đang quản lý</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Đã đóng tiền</div>
+            <div class="stat-value" id="statPaid">-</div>
+            <div class="stat-sub">Lấy từ dữ liệu sinh viên</div>
+          </div>
+
+          <div class="stat-card">
+            <div class="stat-label">Chưa đóng tiền</div>
+            <div class="stat-value" id="statUnpaid">-</div>
+            <div class="stat-sub">Lấy từ dữ liệu sinh viên</div>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <!-- Left: rooms list -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Danh sách phòng (tóm tắt)</div>
+                <div class="panel-hint">Nhấn “Xem” để vào chi tiết phòng</div>
+              </div>
+              <a class="link" href="room_info.html?view=overview">Xem tất cả</a>
+            </div>
+
+            <div class="panel-body">
+              <table class="admin-table">
+                <thead>
+                  <tr>
+                    <th>Phòng</th>
+                    <th>Khu</th>
+                    <th>Số SV</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody id="roomsTableBody">
+                  <tr><td colspan="4" style="color:#6b7280; padding:14px;">Đang tải...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Right: quick actions -->
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Thao tác nhanh</div>
+                <div class="panel-hint">Dành cho quản trị viên</div>
+              </div>
+            </div>
+
+            <div class="panel-body">
+              <div class="quick-actions">
+                <button class="qa-btn" onclick="location.href='room_info.html?view=overview'">
+                  <div class="qa-title"> Quản lý phòng</div>
+                  <div class="qa-desc">Xem tổng quan, thêm/xóa sinh viên theo phòng.</div>
+                </button>
+
+                <button class="qa-btn" onclick="quickFindStudent()">
+                  <div class="qa-title"> Tra cứu sinh viên</div>
+                  <div class="qa-desc">Nhập mã SV để mở trang thông tin cá nhân.</div>
+                </button>
+
+                <button class="qa-btn" onclick="location.href='bill.html'">
+                  <div class="qa-title"> Quản lý hóa đơn</div>
+                  <div class="qa-desc">Xem hóa đơn theo sinh viên.</div>
+                </button>
+              </div>
+
+              <div style="margin-top:14px;">
+                <div class="panel-hint" style="margin-bottom:8px;">Gợi ý: Trạng thái thanh toán</div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <span class="badge ok">● Đã đóng</span>
+                  <span class="badge due">● Chưa đóng</span>
+                  <span class="badge warn">● Cần kiểm tra</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ✅ apiFetch trong api.js -->
+  <script src="api.js"></script>
+
+  <script>
+    // ===== Session logic của bạn (giữ nguyên) =====
+    window.addEventListener('load', async function() {
+      if (!validateSession()) {
+        window.location.href = 'index.html';
+        return;
+      }
+      document.addEventListener('click', updateActivityTime);
+      document.addEventListener('keypress', updateActivityTime);
+
+      // Enter tìm nhanh
+      const qs = document.getElementById("quickSearch");
+      qs.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") quickFindStudent();
+      });
+
+      await loadDashboard();
+    });
+
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      sidebar.classList.toggle('collapsed');
+      updateActivityTime();
+    }
+
+    function validateSession() {
+      const sessionToken = localStorage.getItem('sessionToken');
+      const sessionLastActivity = localStorage.getItem('sessionLastActivity');
+
+      if (!sessionToken) return false;
+
+      const currentTime = Date.now();
+      const lastActivityTime = parseInt(sessionLastActivity || "0");
+      const timeoutDuration = 5 * 60 * 1000;
+
+      if (currentTime - lastActivityTime > timeoutDuration) {
+        logout();
+        return false;
+      }
+      return true;
+    }
+
+    function updateActivityTime() {
+      const sessionToken = localStorage.getItem('sessionToken');
+      if (sessionToken) localStorage.setItem('sessionLastActivity', Date.now());
+    }
+
+    function logout() {
+      localStorage.removeItem('sessionToken');
+      localStorage.removeItem('sessionUsername');
+      localStorage.removeItem('sessionStart');
+      localStorage.removeItem('sessionLastActivity');
+      window.location.href = "index.html";
+    }
+
+    // ===== Helpers: tính đã/chưa đóng =====
+    function normalizeStatus(s){
+      return (s || "").toLowerCase().trim();
+    }
+    function isPaidStatus(status){
+      const s = normalizeStatus(status);
+      // chấp nhận cả có dấu và không dấu
+      return s.includes("đã đóng") || s.includes("da dong");
+    }
+
+    // ===== Actions =====
+    function refreshDashboard(){
+      loadDashboard();
+    }
+
+    function quickFindStudent(){
+      const code = document.getElementById("quickSearch").value.trim();
+      if(!code){
+        alert("Nhập mã SV trước (VD: N23DCVT001)");
+        return;
+      }
+      sessionStorage.setItem("studentCode", code);
+      window.location.href = "studentinfo.html";
+    }
+
+    // ===== Dashboard logic (đã nối API thật) =====
+    async function loadDashboard(){
+      if (typeof apiFetch !== "function") {
+        alert("Không tìm thấy apiFetch. Kiểm tra file api.js có được load không.");
+        return;
+      }
+
+      // UI loading
+      document.getElementById("statRooms").textContent = "-";
+      document.getElementById("statStudents").textContent = "-";
+      document.getElementById("statPaid").textContent = "-";
+      document.getElementById("statUnpaid").textContent = "-";
+      document.getElementById("roomsTableBody").innerHTML =
+        `<tr><td colspan="4" style="color:#6b7280; padding:14px;">Đang tải...</td></tr>`;
+
+      try {
+        const rooms = await apiFetch("/api/rooms");
+        const safeRooms = Array.isArray(rooms) ? rooms : [];
+
+        // stats rooms + students
+        document.getElementById("statRooms").textContent = safeRooms.length;
+        const totalStudents = safeRooms.reduce((sum, r) => sum + (r.memberCount || 0), 0);
+        document.getElementById("statStudents").textContent = totalStudents;
+
+        // render rooms table
+        const body = document.getElementById("roomsTableBody");
+        body.innerHTML = "";
+        if (safeRooms.length === 0){
+          body.innerHTML = `<tr><td colspan="4" style="color:#6b7280; padding:14px;">Chưa có dữ liệu phòng.</td></tr>`;
+        } else {
+          safeRooms.forEach(r => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td><strong>${r.room ?? "-"}</strong></td>
+              <td>${r.block ?? "-"}</td>
+              <td>${r.memberCount ?? 0}</td>
+              <td style="text-align:right;">
+                <a class="link" href="room_info.html?view=overview">Xem</a>
+              </td>
+            `;
+            body.appendChild(tr);
+          });
+        }
+
+        // ===== TÍNH ĐÃ/CHƯA ĐÓNG TỪ BACKEND =====
+        // cache theo code để không gọi lặp
+        const studentCache = new Map();
+        let paid = 0;
+        let unpaid = 0;
+
+        for (const r of safeRooms){
+          let members = [];
+          try{
+            members = await apiFetch(`/api/rooms/${encodeURIComponent(r.room)}/members`);
+            if (!Array.isArray(members)) members = [];
+          }catch(err){
+            // phòng nào lỗi members -> bỏ qua phòng đó
+            continue;
+          }
+
+          for (const m of members){
+            const code = (m && m.code) ? String(m.code).trim() : "";
+            if (!code) continue;
+
+            let stu = studentCache.get(code);
+            if (!stu){
+              try{
+                stu = await apiFetch(`/api/students/${encodeURIComponent(code)}`);
+                studentCache.set(code, stu);
+              }catch(err){
+                // không lấy được student -> tính vào unpaid để dễ nhìn
+                unpaid++;
+                continue;
+              }
+            }
+
+            if (isPaidStatus(stu.status)) paid++;
+            else unpaid++;
+          }
+        }
+
+        document.getElementById("statPaid").textContent = paid;
+        document.getElementById("statUnpaid").textContent = unpaid;
+
+      } catch (e) {
+        alert("Không tải được dữ liệu dashboard: " + (e?.message || e));
+        document.getElementById("roomsTableBody").innerHTML =
+          `<tr><td colspan="4" style="color:#991b1b; padding:14px;">Lỗi tải dữ liệu.</td></tr>`;
+      }
+    }
+  </script>
+</body>
+</html>

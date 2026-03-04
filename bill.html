@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa đơn - PTIT</title>
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; font-family: Arial, sans-serif; background-color: #fff5f5; height: 100vh; display: flex; flex-direction: column; }
+
+        .header { background-color: #ff3333; height: 60px; display: flex; justify-content: space-between; align-items: center; padding: 0 20px; color: white; flex-shrink: 0; }
+        .menu-icon { font-size: 30px; cursor: pointer; }
+
+        .container { display: flex; flex: 1; overflow: hidden; }
+
+        .sidebar { width: 300px; background-color: white; border-right: 2px solid #ff3333; display: flex; flex-direction: column; padding: 20px 0; overflow: hidden; transition: width 0.3s ease, border 0.3s ease; flex-shrink: 0; }
+        .sidebar.collapsed { width: 0; border: none; }
+        .menu-list { flex: 1; padding: 0 20px; overflow-y: auto; }
+
+        .menu-section-title { color: #ff3333; font-weight: bold; font-size: 16px; margin-top: 15px; margin-bottom: 10px; cursor: pointer; display: flex; align-items: center; gap: 8px; }
+        .menu-section-title:hover { color: #cc0000; }
+
+        .menu-item { padding: 12px 0 12px 20px; border-bottom: 2px solid #ffcccc; color: #ff3333; font-size: 16px; cursor: pointer; display: flex; align-items: center; text-decoration: none; transition: color 0.3s; }
+        .menu-item:hover { color: #cc0000; }
+        .menu-item.active { font-weight: bold; }
+
+        .sidebar-footer { padding: 20px; display: flex; align-items: center; gap: 10px; }
+        .footer-logo { width: 50px; height: auto; }
+        .footer-text { font-size: 10px; font-weight: bold; color: #cc3333; text-transform: uppercase; line-height: 1.3; }
+
+        .main-content { flex: 1; padding: 30px; overflow-y: auto; display: flex; justify-content: center; align-items: center; }
+
+        .bill-container {
+            background: white;
+            border: 2px solid #ff3333;
+            border-radius: 10px;
+            padding: 30px;
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        .page-title {
+            color: #ff3333;
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .bill-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .bill-table thead {
+            background-color: #fff5f5;
+            border-top: 2px solid #0099cc;
+            border-bottom: 2px solid #0099cc;
+        }
+
+        .bill-table th {
+            padding: 15px 10px;
+            text-align: left;
+            color: #333;
+            font-weight: bold;
+            font-size: 14px;
+            border-bottom: 2px solid #0099cc;
+        }
+
+        .bill-table td {
+            padding: 12px 10px;
+            color: #333;
+            font-size: 14px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .bill-table tbody tr:hover { background-color: #fff9f9; }
+        .bill-table tbody tr:nth-child(even) { background-color: #fff5f5; }
+
+        .bill-table .currency { text-align: right; color: #ff3333; font-weight: bold; }
+
+        .action-buttons { display: flex; gap: 8px; justify-content: center; }
+        .action-buttons button {
+            background: none;
+            border: none;
+            color: #0066cc;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 5px;
+        }
+        .action-buttons button:hover { color: #ff3333; }
+
+        .back-btn-top {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 5px;
+            margin-left: auto;
+        }
+        .back-btn-top:hover { color: #ffcccc; }
+
+        .helper-box{
+            margin-top: 10px;
+            background: #fff5f5;
+            border: 1px solid #ffcccc;
+            padding: 12px 14px;
+            border-radius: 8px;
+            color: #b81414;
+            font-weight: 700;
+            font-size: 13px;
+        }
+        .helper-box small{ display:block; margin-top:6px; font-weight: 600; color:#9b1c1c; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="menu-icon" onclick="toggleSidebar()">☰</div>
+        <button class="back-btn-top" onclick="goBack()">←</button>
+    </div>
+
+    <div class="container">
+
+        <div class="sidebar" id="sidebar">
+            <div class="menu-list">
+                <a href="home.html" class="menu-item">🏠 Trang chủ</a>
+                <a href="room_info.html?view=overview" class="menu-item">📋 Thông tin phòng</a>
+
+                <div class="menu-section-title" onclick="toggleSection(this)">▶ Khu A</div>
+                <div class="menu-subsection" style="display: none;">
+                    <a href="room_info.html" class="menu-item" data-room="A1">Phòng A1</a>
+                    <a href="room_info.html" class="menu-item" data-room="A2">Phòng A2</a>
+                </div>
+
+                <div class="menu-section-title" onclick="toggleSection(this)">▶ Khu B</div>
+                <div class="menu-subsection" style="display: none;">
+                    <a href="room_info.html" class="menu-item" data-room="B1">Phòng B1</a>
+                    <a href="room_info.html" class="menu-item" data-room="B2">Phòng B2</a>
+                </div>
+
+                <a href="https://youtu.be/dQw4w9WgXcQ?si=Bil_istASGQg0YK5" class="menu-item" target="_blank">Hỗ trợ</a>
+            </div>
+
+            <div class="sidebar-footer">
+                <img src="https://dhs.ptit.edu.vn/web/image/385-67ae5bc7/Logo_PTIT_University.png" alt="Logo" class="footer-logo">
+                <div class="footer-text">
+                    HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH<br>
+                    VIỄN THÔNG CƠ SỞ TP.HỒ CHÍ MINH
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="bill-container">
+                <div class="page-title">Danh sách hóa đơn</div>
+
+                <div id="helper" class="helper-box" style="display:none;"></div>
+
+                <table class="bill-table">
+                    <thead>
+                        <tr>
+                            <th>STT</th>
+                            <th>Mã SV</th>
+                            <th>Tên sinh viên</th>
+                            <th>Lớp</th>
+                            <th>Ngày sinh</th>
+                            <th>Số hóa đơn</th>
+                            <th>Số tiền</th>
+                            <th>Ngày đóng</th>
+                            <th>Ngày lập phiếu</th>
+                            <th>Ghi chú</th>
+                            <th>Tải hóa đơn</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td id="billStudentCode">-</td>
+                            <td id="billStudentName">-</td>
+                            <td id="billClass">-</td>
+                            <td id="billDob">-</td>
+                            <td id="billCode">-</td>
+                            <td class="currency" id="billAmount">-</td>
+                            <td id="billPaymentDate">-</td>
+                            <td id="billCreatedDate">-</td>
+                            <td id="billNote">-</td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button onclick="downloadBill()" title="Tải xuống">📥</button>
+                                    <button onclick="printBill()" title="In hóa đơn">🖨️</button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="api.js"></script>
+    <script>
+        window.addEventListener('load', async function() {
+            if (!validateSession()) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            // submenu room click
+            const roomLinks = document.querySelectorAll('[data-room]');
+            roomLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const room = this.getAttribute('data-room');
+                    window.location.href = 'room_info.html?room=' + encodeURIComponent(room);
+                });
+            });
+
+            document.addEventListener('click', updateActivityTime);
+            document.addEventListener('keypress', updateActivityTime);
+
+            await loadBillInfo();
+        });
+
+        // ====== Helpers ======
+        function showHelper(html){
+            const el = document.getElementById("helper");
+            el.innerHTML = html;
+            el.style.display = "block";
+        }
+        function hideHelper(){
+            const el = document.getElementById("helper");
+            el.style.display = "none";
+            el.innerHTML = "";
+        }
+
+        function getStudentCodeForBill(){
+            // 1) query param: ?code=... hoặc ?studentCode=...
+            const qs = new URLSearchParams(window.location.search);
+            const q1 = (qs.get("code") || "").trim();
+            const q2 = (qs.get("studentCode") || "").trim();
+            if (q1) return q1;
+            if (q2) return q2;
+
+            // 2) sessionStorage: billStudentCode hoặc studentCode
+            const s1 = (sessionStorage.getItem("billStudentCode") || "").trim();
+            const s2 = (sessionStorage.getItem("studentCode") || "").trim();
+            if (s1) return s1;
+            if (s2) return s2;
+
+            return "";
+        }
+
+        function fmtMoneyVND(amount){
+            if (amount === null || amount === undefined || amount === "") return "-";
+            const n = Number(amount);
+            if (Number.isNaN(n)) return String(amount) + " VNĐ";
+            try { return n.toLocaleString("vi-VN") + " VNĐ"; }
+            catch { return n + " VNĐ"; }
+        }
+
+        function paidStatusToText(paidStatus){
+            const s = (paidStatus || "").toUpperCase();
+            if (s === "PAID") return "Đã đóng";
+            if (s === "UNPAID") return "Chưa đóng";
+            return paidStatus || "-";
+        }
+
+        function safeText(id, value){
+            const el = document.getElementById(id);
+            if (el) el.textContent = (value === null || value === undefined || value === "") ? "-" : String(value);
+        }
+
+        // ====== MAIN LOAD ======
+        async function loadBillInfo() {
+            hideHelper();
+
+            if (typeof apiFetch !== "function") {
+                showHelper(`Không tìm thấy <b>apiFetch</b>. Kiểm tra file <b>api.js</b> có load đúng không.`);
+                return;
+            }
+
+            const code = getStudentCodeForBill();
+
+            if (!code) {
+                showHelper(`
+                    Chưa có mã sinh viên để tải hóa đơn.
+                    <small>
+                      Cách 1: Mở theo dạng <b>bill.html?code=N23DCVT001</b><br>
+                      Cách 2: Trước khi qua trang bill, set <b>sessionStorage.setItem("billStudentCode","N23DCVT001")</b> (hoặc <b>studentCode</b>).
+                    </small>
+                `);
+                return;
+            }
+
+            // lưu lại cho những lần sau
+            sessionStorage.setItem("billStudentCode", code);
+
+            try {
+                const bills = await apiFetch(`/api/bills/by-student/${encodeURIComponent(code)}`);
+
+                const arr = Array.isArray(bills) ? bills : (bills ? [bills] : []);
+                if (arr.length === 0) {
+                    safeText("billStudentCode", code);
+                    safeText("billNote", "Sinh viên chưa có hóa đơn");
+                    showHelper(`Không tìm thấy hóa đơn cho mã SV <b>${code}</b>.`);
+                    return;
+                }
+
+                const b = arr[0] || {};
+
+                // Map đúng field theo API bạn gửi:
+                safeText("billStudentCode", b.studentCode || code);
+                safeText("billStudentName", b.studentName);
+                safeText("billClass", b.clazz);
+                safeText("billDob", b.dob);
+                safeText("billCode", b.billNo);
+
+                const paidText = paidStatusToText(b.paidStatus);
+                const noteText = b.note ? `${b.note} (${paidText})` : paidText;
+
+                document.getElementById("billAmount").textContent = fmtMoneyVND(b.amount);
+                safeText("billPaymentDate", b.paymentDate);
+                safeText("billCreatedDate", b.createdDate);
+                safeText("billNote", noteText);
+
+            } catch (e) {
+                showHelper(`Không tải được hóa đơn cho mã SV <b>${code}</b>.<small>${(e && e.message) ? e.message : e}</small>`);
+            }
+        }
+
+        // ===== Buttons =====
+        function downloadBill() {
+            alert('Tính năng tải xuống sẽ sớm có!');
+        }
+
+        function toggleSection(element) {
+            const subsection = element.nextElementSibling;
+            if (subsection && subsection.classList.contains('menu-subsection')) {
+                const willShow = (subsection.style.display === 'none');
+                subsection.style.display = willShow ? 'block' : 'none';
+                element.textContent = (willShow ? '▼ ' : '▶ ') + element.textContent.slice(2);
+            }
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+            updateActivityTime();
+        }
+
+        function goBack() { window.history.back(); }
+        function printBill() { window.print(); }
+
+        // ===== Session =====
+        function validateSession() {
+            const sessionToken = localStorage.getItem('sessionToken');
+            const sessionLastActivity = localStorage.getItem('sessionLastActivity');
+
+            if (!sessionToken) return false;
+
+            const currentTime = Date.now();
+            const lastActivityTime = parseInt(sessionLastActivity || "0", 10);
+            const timeoutDuration = 5 * 60 * 1000;
+
+            if (currentTime - lastActivityTime > timeoutDuration) {
+                logout();
+                return false;
+            }
+            return true;
+        }
+
+        function updateActivityTime() {
+            const sessionToken = localStorage.getItem('sessionToken');
+            if (sessionToken) localStorage.setItem('sessionLastActivity', Date.now());
+        }
+
+        function logout() {
+            localStorage.removeItem('sessionToken');
+            localStorage.removeItem('sessionUsername');
+            localStorage.removeItem('sessionStart');
+            localStorage.removeItem('sessionLastActivity');
+            window.location.href = "index.html";
+        }
+    </script>
+
+</body>
+</html>

@@ -1,2 +1,1 @@
-# ktx-frontend
-Website quản lý ký túc xá PTIT
+Website quản lý ktx sinh viên
